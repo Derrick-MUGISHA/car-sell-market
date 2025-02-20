@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import RegisterDialog from "./(web)/_components/auth/RegisterDialog";
+import LoginDialog from "./(web)/_components/auth/LoginDialog";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { QueryProvider } from "@/context/query-provider";
 
 
 
@@ -19,9 +22,14 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`bg-[#EBF2F7] antialiased`}>
+          <QueryProvider>
+          <NuqsAdapter>
           <RegisterDialog />
+          <LoginDialog />
           {children}
+          </NuqsAdapter>
           <Toaster />
+          </QueryProvider>
       </body>
     </html>
   );
