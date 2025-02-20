@@ -23,10 +23,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRegisterDialog } from "@/hooks/use-register.dialog";
 import { useLoginDialog } from "@/hooks/use-login.dialog";
+import { registerMutationFn } from "@/lib/fetcher";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import { Loader } from "lucide-react";
 
 const RegisterDialog = () => {
   const { open, onClose } = useRegisterDialog();
   const { onOpen } = useLoginDialog();
+
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: registerMutationFn,
+    onSuccess: () => {
+      queryClient.refetchQueries({
+        queryKey: ["currentUser"],
+      });
+      toast({
+        title: "Registration successful",
+        description: "You have successfully registered",
+        variant: "success",
+      });
+      form.reset();
+      onClose();
+    },
+    onError: () => {
+      toast({
+        title: "Registration failed",
+        description: "Couldn't register, please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -39,8 +67,7 @@ const RegisterDialog = () => {
   });
 
   const onSubmit = (values: z.infer<typeof signupSchema>) => {
-    console.log(values);
-    // Add registration logic
+    mutate(values);
   };
 
   const handleLoginOpen = () => {
@@ -50,12 +77,15 @@ const RegisterDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-     <DialogContent className="sm:max-w-[425px] bg-white/90 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-[425px] bg-white/90 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center">Create an account</DialogTitle>
           <DialogDescription className="text-center">
             Already have an account?{" "}
-            <button className="text-primary font-semibold" onClick={handleLoginOpen}>
+            <button
+              className="text-primary font-semibold"
+              onClick={handleLoginOpen}
+            >
               Sign in
             </button>
           </DialogDescription>
@@ -77,15 +107,18 @@ const RegisterDialog = () => {
                 </FormItem>
               )}
             />
-
-<FormField
+            <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="mail@example.com" type="email" {...field} />
+                    <Input
+                      placeholder="mail@example.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,7 +132,11 @@ const RegisterDialog = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="**************" type="password" {...field} />
+                    <Input
+                      placeholder="**************"
+                      type="password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,15 +150,20 @@ const RegisterDialog = () => {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="**************" type="password" {...field} />
+                    <Input
+                      placeholder="**************"
+                      type="password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             {/* Other form fields... */}
-            
-            <Button type="submit" className="w-full">
+
+            <Button type="submit" disabled={isPending} className="w-full">
+              {isPending && <Loader className="w-4 h-4 animate-spin mr-2" />}
               Register
             </Button>
           </form>

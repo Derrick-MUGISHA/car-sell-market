@@ -1,9 +1,10 @@
 import "server-only";
 
-import { Client } from 'node-appwrite';
+import { Client, Databases } from 'node-appwrite';
 import { Account } from 'node-appwrite';
 import { APP_CONFIG } from './app-config';
 import { cookies } from "next/headers";
+import { AUTH_COOKIE_NAME } from "@/constants/server";
 
 export async function createAdminClient() {
     const client = new Client()
@@ -15,6 +16,9 @@ export async function createAdminClient() {
       get account() {
         return new Account(client);
       },
+      get database() {
+        return new Databases(client);
+      },
     };
   }
 
@@ -25,7 +29,7 @@ export async function createAdminClient() {
       .setEndpoint(APP_CONFIG.APPWRITE.ENDPOINT)
       .setProject(APP_CONFIG.APPWRITE.PROJECT_ID);
   
-    const session = await cookies().get("WALL_MARK_CARE");
+    const session = await cookies().get(AUTH_COOKIE_NAME);
     if (!session || !session.value) {
       throw new Error("No session");
     }
@@ -35,6 +39,9 @@ export async function createAdminClient() {
     return {
       get account() {
         return new Account(client);
+      },
+      get database() {
+        return new Databases(client);
       },
     };
   }

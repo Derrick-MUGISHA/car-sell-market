@@ -1,1 +1,1 @@
-export const AUTH_COOKIE_NAME = "WALL_MARK_CARE";
+export const AUTH_COOKIE_NAME = "wall_mark_care";
