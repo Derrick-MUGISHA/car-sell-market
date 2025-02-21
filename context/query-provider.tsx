@@ -24,7 +24,7 @@ export const QueryProvider = ({ children }: Props) => {
                     return false;
                 },
                 retryDelay: 0,
-                staleTime: 1000 * 60 * 60 * 24, // 24 hours
+                // staleTime: 1000 * 60 * 60 * 24, // 24 hours
             },
         },
     });

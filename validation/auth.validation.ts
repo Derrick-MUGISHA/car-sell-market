@@ -12,28 +12,31 @@ export const signupSchema = object({
     email: string().email({
         message: 'please enter a valid email address'
     })
-    .min(1, {
-        message: 'Email is required'
+        .min(1, {
+            message: 'Email is required'
+        }),
+
+    ShopName: string().min(2, {
+        message: 'Shop Name is required'
     }),
-    password: string().min(1, {
-        message: 'Password is required'
+
+    password: string().min(8, {
+        message: 'Password should be at least 8 characters'
     }),
-    confirmPassword: string().min(1, {
-        message: 'Confirm Password is required'
-    }),
+
 });
 
 // login form
 
 
 export const loginSchema = object({
-    
+
     email: string().email({
         message: 'please enter a valid email address'
     })
-    .min(1, {
-        message: 'Email is required'
-    }),
+        .min(1, {
+            message: 'Email is required'
+        }),
     password: string().min(1, {
         message: 'Password is required'
     }),

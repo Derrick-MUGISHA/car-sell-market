@@ -35,25 +35,6 @@ const RegisterDialog = () => {
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: registerMutationFn,
-    onSuccess: () => {
-      queryClient.refetchQueries({
-        queryKey: ["currentUser"],
-      });
-      toast({
-        title: "Registration successful",
-        description: "You have successfully registered",
-        variant: "success",
-      });
-      form.reset();
-      onClose();
-    },
-    onError: () => {
-      toast({
-        title: "Registration failed",
-        description: "Couldn't register, please try again",
-        variant: "destructive",
-      });
-    },
   });
 
   const form = useForm<z.infer<typeof signupSchema>>({
@@ -61,13 +42,33 @@ const RegisterDialog = () => {
     defaultValues: {
       name: "",
       email: "",
+      ShopName: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof signupSchema>) => {
-    mutate(values);
+    mutate(values, {
+      onSuccess: () => {
+        queryClient.refetchQueries({
+          queryKey: ["currentUser"],
+        });
+        toast({
+          title: "Registration successful",
+          description: "You have successfully registered",
+          variant: "success",
+        });
+        form.reset();
+        onClose();
+      },
+      onError: () => {
+        toast({
+          title: "Registration failed",
+          description: "Couldn't register, please try again",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleLoginOpen = () => {
@@ -101,7 +102,7 @@ const RegisterDialog = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Derrick" {...field} />
+                    <Input placeholder="Derr***" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500 text-xs mt-1" />
                 </FormItem>
@@ -117,6 +118,23 @@ const RegisterDialog = () => {
                     <Input
                       placeholder="mail@example.com"
                       type="email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ShopName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shop Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="kgl store"
                       {...field}
                     />
                   </FormControl>
@@ -143,23 +161,6 @@ const RegisterDialog = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="**************"
-                      type="password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             {/* Other form fields... */}
 
             <Button type="submit" disabled={isPending} className="w-full">

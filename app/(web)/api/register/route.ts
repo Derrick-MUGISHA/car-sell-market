@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             name,
             email,
             password,
-            confirmPassword,
+            ShopName,
         } = await signupSchema.parse(body);
 
         const { account, database } = await createAdminClient();
@@ -27,10 +27,10 @@ export async function POST(request: Request) {
 
         const confirm = await database.createDocument(
             APP_CONFIG.APPWRITE.DATABASE_ID,
-            APP_CONFIG.APPWRITE.COLLECTION_ID,
+            APP_CONFIG.APPWRITE.SHOP_ID,
             ID.unique(),
             {
-                confirmPassword: confirmPassword,
+                ShopName: ShopName,
                 userId: user.$id,
             }
         );
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             message: "User created successfully",
             userId: user.$id,
-            confirmPassword: confirmPassword,
+            shopId: confirm.$id,
         })
     } catch (error: any) {
         return NextResponse.json(
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
                 error: error.message,
             },
             {
-                status: 400,
+                status: 500,
             },
         );
     }

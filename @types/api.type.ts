@@ -4,9 +4,11 @@ export type LoginType = {
 };
 
 export type RegisterType = {
-  email: string;
-  password: string;
   name: string;
+  email: string;
+  ShopName: string;
+  password: string;
+ 
 };
 
 export type User = {
