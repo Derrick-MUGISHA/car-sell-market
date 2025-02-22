@@ -2,18 +2,32 @@
 
 import React from "react";
 import Logo from "./Logo/page";
-import { Plus, Search } from "lucide-react";
+import { Loader, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { useRegisterDialog } from "@/hooks/use-register.dialog";
 import { useLoginDialog } from "@/hooks/use-login.dialog";
+import useCurrentUser from "@/hooks/api/user-current-user";
+import { useRouter } from "next/navigation";
 
 function NavBar() {
+  const router = useRouter();
   const { onOpen: onRegisterOpen } = useRegisterDialog();
   const { onOpen: onLoginOpen } = useLoginDialog();
   const [searchKeyword, setSearchKeyword] = React.useState("");
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  const { data: userData, isPending: isLoading} = useCurrentUser();
+  const user = userData?.user;
+
+  const handleSell = () => {
+    if (!user) {
+      onLoginOpen();
+      return;
+    }
+    router.push("/my-shop/add-listing")
+  }
 
   return (
     <header className="w-full bg-primary sticky top-0 z-50 h-16 md:h-20 lg:h-24 shadow-sm">
@@ -78,6 +92,19 @@ function NavBar() {
               />
 
               {/* Auth Buttons */}
+
+              {isLoading ? (
+                <Loader  className="w-5 h-5 animate-spin text-white"/>
+              ) : !user ? (
+                <div></div>
+              ) : (
+                <Button
+                  onClick={onLogout}
+                  className="text-white hover:bg-white/60 hover:text-white"
+                >
+                  Logout
+                </Button>
+              )}
               <div className="flex items-center space-x-3">
                 <Button
                   onClick={onLoginOpen}
@@ -95,7 +122,8 @@ function NavBar() {
 
               {/* Sell Car Button */}
               <Button className="bg-green-600 hover:bg-green-700 text-white ml-4">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 h-4 w-4"
+                 onClick={handleSell}/>
                 Sell Car
               </Button>
             </div>
