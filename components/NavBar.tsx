@@ -29,6 +29,21 @@ function NavBar() {
     router.push("/my-shop/add-listing")
   }
 
+  const onLogout = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <header className="w-full bg-primary sticky top-0 z-50 h-16 md:h-20 lg:h-24 shadow-sm">
       <nav className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

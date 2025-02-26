@@ -11,6 +11,7 @@ import { ID } from "node-appwrite";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
+        console.log(body);
         const {
             name,
             email,
@@ -19,12 +20,16 @@ export async function POST(request: Request) {
         } = await signupSchema.parse(body);
 
         const { account, database } = await createAdminClient();
+        console.log(account);
+        
         const user = await account.create(
             ID.unique(), email, password, name
         );
+        console.log(user);
         const session = await account.createEmailPasswordSession(email, password,
         );
 
+        console.log(session);
         const confirm = await database.createDocument(
             APP_CONFIG.APPWRITE.DATABASE_ID,
             APP_CONFIG.APPWRITE.SHOP_ID,
@@ -34,6 +39,7 @@ export async function POST(request: Request) {
                 userId: user.$id,
             }
         );
+        console.log(confirm);
         cookies().set(AUTH_COOKIE_NAME, session.secret, {
             path: '/',
             httpOnly: true,
@@ -41,6 +47,11 @@ export async function POST(request: Request) {
             secure: true,
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
+
+        console.log({
+            userId: user.$id,
+            shopId: confirm.$id
+        })
 
         return NextResponse.json({
             message: "User created successfully",
