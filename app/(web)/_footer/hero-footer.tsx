@@ -1,14 +1,6 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-} from "@/components/ui/select";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CAR_BRAND_OPTIONS,
   CAR_CONDITION_OPTIONS,
@@ -17,28 +9,35 @@ import {
   CAR_PRICE_RANGE_OPTIONS,
   CAR_YEAR_RANGE_OPTIONS,
 } from "@/constants/car-options";
-import { SelectValue } from "@radix-ui/react-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import React, { useState } from "react";
 
-interface filterOption {
+interface FilterOption {
   label: string;
   value: string;
 }
 
-interface FilterSelectorProps {
+interface FilterSelectProps {
   label: string;
-  options: filterOption[];
+  options: FilterOption[];
   placeholder: string;
   onChange: (value: string) => void;
 }
 
-function HeroFooter() {
-  // const router = useRouter();
+const HeroFilter = () => {
+  const router = useRouter();
 
-  const [selectedFilter, setSelectedFilter] = useState<{
+  const [selectedFilters, setSelectedFilters] = useState<{
     brand?: string;
     condition?: string;
     model?: string;
@@ -48,17 +47,22 @@ function HeroFooter() {
     price?: string;
   }>({});
 
-  const filterOptions: Record<string, filterOption[]> = {
-    brand: CAR_BRAND_OPTIONS,
+  const filterOptions: Record<string, FilterOption[]> = {
+    brands: CAR_BRAND_OPTIONS,
     models: CAR_MODEL_OPTIONS,
     conditions: CAR_CONDITION_OPTIONS,
     years: CAR_YEAR_RANGE_OPTIONS,
-    fuelType: CAR_FUELTYPE_OPTIONS,
-    priceRange: CAR_PRICE_RANGE_OPTIONS?.filter((item) => item.value !== "0"),
+    fuelTypes: CAR_FUELTYPE_OPTIONS,
+    priceRange: CAR_PRICE_RANGE_OPTIONS?.filter(
+      (item) => item.value !== "custom"
+    ),
   };
 
-  const handleFilterChange = (key: keyof typeof selectedFilter, value: string) => {
-    setSelectedFilter((prev) => ({
+  const handleFilterChange = (
+    key: keyof typeof selectedFilters,
+    value: string
+  ) => {
+    setSelectedFilters((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -66,20 +70,25 @@ function HeroFooter() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    Object.entries(selectedFilter).forEach(([key, value]) => {
+    Object.entries(selectedFilters).forEach(([key, value]) => {
       if (value) {
         params.append(key, value);
       }
     });
-    router.push(`/search?${params.toString()}`); // dou to the messing  useRouter()
+    console.log(params);
+    router.push(`/search/${params.toString()}`);
   };
 
   return (
     <div className="w-full flex flex-col gap-6 pt-6">
-      <div className="w-full flex flex-wrap items-center justify-center gap-4 md:gap-4 lg:gap-8">
+      <div
+        className="w-full flex flex-wrap items-center
+      justify-center gap-4
+      "
+      >
         <FilterSelect
           label="Brand"
-          options={filterOptions.brand}
+          options={filterOptions.brands}
           placeholder="Brand"
           onChange={(value) => handleFilterChange("brand", value)}
         />
@@ -103,18 +112,21 @@ function HeroFooter() {
           options={filterOptions.years}
           placeholder="Year"
           onChange={(value) => {
-            const [min, max] = value.split("-").map(Number);
-            setSelectedFilter((prev) => ({
+            const [min, max] =
+              value === ""
+                ? [0, 0]
+                : value?.split("-")?.map(Number) || [null, null];
+            setSelectedFilters((prev) => ({
               ...prev,
-              year_min: min.toString(),
-              year_max: max.toString(),
+              year_min: `${min}`,
+              year_max: `${max}`,
             }));
           }}
         />
 
         <FilterSelect
-          label="Fuel Type"
-          options={filterOptions.fuelType}
+          label="Fuel"
+          options={filterOptions.fuelTypes}
           placeholder="Fuel Type"
           onChange={(value) => handleFilterChange("fuelType", value)}
         />
@@ -128,32 +140,39 @@ function HeroFooter() {
       </div>
 
       <Button
-        className="w-full lg:w-11/12 mx-auto flex items-center justify-between py-6 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none transition duration-200"
+        className="
+           w-full lg:w-11/12 mx-auto flex 
+           items-center justify-between py-6
+          "
         onClick={handleSearch}
       >
-        <span className="flex items-center gap-1 font-light">
-          <b className="font-bold">1000+</b> CAR Listed
+        <span
+          className="flex items-center gap-1 
+              font-light"
+        >
+          <b className="font-bold">1000+</b>
+          CAR LISTED
         </span>
-        <span className="flex items-center gap-1 uppercase font-semibold">
+        <span
+          className="flex items-centergap-1 uppercase
+        font-semibold
+        "
+        >
           Search Now
           <ChevronRight />
         </span>
       </Button>
-
-      <p className="text-muted text-sm text-center text-gray-700 mt-4">
-        Want to search more customized{" "}
-        <Link
-          href="/search"
-          className="text-blue-500 hover:text-blue-700 underline font-semibold ml-2"
-        >
-          Advanced search
+      <p className="text-muted-foreground text-sm text-center">
+        Want to search more customized
+        <Link href="/search" className="text-primary underline font-bold ml-2">
+          Advanced Search
         </Link>
       </p>
     </div>
   );
-}
+};
 
-const FilterSelect: React.FC<FilterSelectorProps> = ({
+const FilterSelect: React.FC<FilterSelectProps> = ({
   label,
   options,
   placeholder,
@@ -162,7 +181,7 @@ const FilterSelect: React.FC<FilterSelectorProps> = ({
   return (
     <div className="w-full lg:w-[28%]">
       <Select onValueChange={onChange}>
-        <SelectTrigger className="w-full px-4 py-2 border rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -178,6 +197,6 @@ const FilterSelect: React.FC<FilterSelectorProps> = ({
       </Select>
     </div>
   );
-}
+};
 
-export default HeroFooter;
+export default HeroFilter;
