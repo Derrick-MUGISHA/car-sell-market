@@ -9,16 +9,22 @@ import { ID } from "node-appwrite";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log(body);
+    console.log('Request Body:', body);
     const { email, name, password, shopName } = await signupSchema.parse(body);
 
     const { account, database } = await createAdminClient();
+    
+    // Create user
     const user = await account.create(ID.unique(), email, password, name);
-    console.log(user);
-    const session = await account.createEmailPasswordSession(email, password);
-    console.log(session);
+    console.log('User Created:', user);
 
-    const shop = await database.createDocument(
+    // Create session
+    const session = await account.createEmailPasswordSession(email, password);
+    console.log('Session Created:', session);
+
+    try {
+      // Create shop document
+      const shop = await database.createDocument(
         APP_CONFIG.APPWRITE.DATABASE_ID,
         APP_CONFIG.APPWRITE.SHOP_ID,
         ID.unique(),
@@ -27,8 +33,13 @@ export async function POST(request: Request) {
           userId: user.$id,
         }
       );
-    console.log(shop);
+      console.log('Shop Created:', shop);
+    } catch (error) {
+      console.error('Error creating shop document:', error);
+      throw new Error('Failed to create shop document.');
+    }
 
+    // Set auth cookie
     cookies().set(AUTH_COOKIE_NAME, session.secret, {
       path: "/",
       httpOnly: true,
@@ -40,9 +51,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: "User created successfully",
       userId: user.$id,
-      shopId: shop.$id,
     });
   } catch (error: any) {
+    console.error('Error in registration process:', error);
     return NextResponse.json(
       {
         error: error.message,
