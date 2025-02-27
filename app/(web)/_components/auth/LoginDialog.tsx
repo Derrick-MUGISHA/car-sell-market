@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { loginSchema } from "@/validation/auth.validation";
+import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -19,20 +18,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRegisterDialog } from "@/hooks/use-register.dialog";
-import { useLoginDialog } from "@/hooks/use-login.dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import useLoginDialog from "@/hooks/use-login.dialog";
+import useRegisterDialog from "@/hooks/use-register.dialog";
+import { loginSchema } from "@/validation/auth.validation";
 import { loginMutationFn } from "@/lib/fetcher";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
 
 const LoginDialog = () => {
   const { open, onClose } = useLoginDialog();
-  const { onOpen: onRegisterOpen } = useRegisterDialog();
+  const { onOpen } = useRegisterDialog();
 
   const queryClient = useQueryClient();
+
   const { mutate, isPending } = useMutation({
     mutationFn: loginMutationFn,
   });
@@ -48,54 +49,43 @@ const LoginDialog = () => {
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     mutate(values, {
       onSuccess: () => {
-        queryClient.refetchQueries({
-          queryKey: ["currentUser"]
+        queryClient.invalidateQueries({
+          queryKey: ["currentUser"],
         });
 
         toast({
-          title: "Logged in successfully",
-          description: "Welcome back!",
+          title: "Login Successfully",
+          description: "You have been logged in successfully",
           variant: "success",
         });
+        form.reset();
         onClose();
       },
-      onError: (error) => {
+      onError: () => {
         toast({
-          title: "Error logging in",
-          description: "login failed, please try again",
+          title: "Error occurred",
+          description: "Login failed, please try again",
           variant: "destructive",
-        })
-      }
+        });
+      },
     });
-    // Add login logic
   };
 
   const handleRegisterOpen = () => {
     onClose();
-    onRegisterOpen();
+    onOpen();
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-white/90 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-[425px] p-8">
         <DialogHeader>
-          <DialogTitle className="text-center">
-            Sign in to your account
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Don't have an account?{" "}
-            <button
-              className="text-primary font-semibold"
-              onClick={handleRegisterOpen}
-            >
-              Registration
-            </button>
+          <DialogTitle>Sign in to your account</DialogTitle>
+          <DialogDescription>
+            Enter your email and password to login
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Form fields */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="email"
@@ -106,14 +96,14 @@ const LoginDialog = () => {
                     <Input
                       placeholder="mail@example.com"
                       type="email"
+                      className="!h-10"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-500 text-xs mt-1" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"
@@ -122,8 +112,9 @@ const LoginDialog = () => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="**************"
+                      placeholder="********"
                       type="password"
+                      className="!h-10"
                       {...field}
                     />
                   </FormControl>
@@ -131,16 +122,27 @@ const LoginDialog = () => {
                 </FormItem>
               )}
             />
-            {/* Other form fields... */}
 
             <Button
-            disabled={isPending}
-            type="submit" className="w-full">
-              { isPending && <Loader className="mr-2 h-4 w-4 animate-spin"/>}
+              size="lg"
+              disabled={isPending}
+              className="w-full"
+              type="submit"
+            >
+              {isPending && <Loader className="w-4 h-4 animate-spin" />}
               Login
             </Button>
           </form>
         </Form>
+
+        <div className="mt-2 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">
+            Dont't have an account?{" "}
+            <button className="!text-primary" onClick={handleRegisterOpen}>
+              Registration
+            </button>
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

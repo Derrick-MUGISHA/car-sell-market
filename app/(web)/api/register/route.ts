@@ -6,66 +6,50 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ID } from "node-appwrite";
 
-
-
 export async function POST(request: Request) {
-    try {
-        const body = await request.json();
-        console.log(body);
-        const {
-            name,
-            email,
-            password,
-            ShopName,
-        } = await signupSchema.parse(body);
+  try {
+    const body = await request.json();
+    console.log(body);
+    const { email, name, password, shopName } = await signupSchema.parse(body);
 
-        const { account, database } = await createAdminClient();
-        console.log(account);
-        
-        const user = await account.create(
-            ID.unique(), email, password, name
-        );
-        console.log(user);
-        const session = await account.createEmailPasswordSession(email, password,
-        );
+    const { account, database } = await createAdminClient();
+    const user = await account.create(ID.unique(), email, password, name);
+    console.log(user);
+    const session = await account.createEmailPasswordSession(email, password);
+    console.log(session);
 
-        console.log(session);
-        const confirm = await database.createDocument(
-            APP_CONFIG.APPWRITE.DATABASE_ID,
-            APP_CONFIG.APPWRITE.SHOP_ID,
-            ID.unique(),
-            {
-                ShopName: ShopName,
-                userId: user.$id,
-            }
-        );
-        console.log(confirm);
-        cookies().set(AUTH_COOKIE_NAME, session.secret, {
-            path: '/',
-            httpOnly: true,
-            sameSite: "strict",
-            secure: true,
-            maxAge: 60 * 60 * 24 * 30, // 30 days
-        });
+    const shop = await database.createDocument(
+        APP_CONFIG.APPWRITE.DATABASE_ID,
+        APP_CONFIG.APPWRITE.SHOP_ID,
+        ID.unique(),
+        {
+          shopName: shopName,
+          userId: user.$id,
+        }
+      );
+    console.log(shop);
 
-        console.log({
-            userId: user.$id,
-            shopId: confirm.$id
-        })
+    cookies().set(AUTH_COOKIE_NAME, session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      maxAge: 60 * 60 * 24 * 30,
+    });
 
-        return NextResponse.json({
-            message: "User created successfully",
-            userId: user.$id,
-            shopId: confirm.$id,
-        })
-    } catch (error: any) {
-        return NextResponse.json(
-            {
-                error: error.message,
-            },
-            {
-                status: 500,
-            },
-        );
-    }
+    return NextResponse.json({
+      message: "User created successfully",
+      userId: user.$id,
+      shopId: shop.$id,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }

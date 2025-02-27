@@ -6,19 +6,20 @@ import { Loader, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import { useRegisterDialog } from "@/hooks/use-register.dialog";
-import { useLoginDialog } from "@/hooks/use-login.dialog";
+import useRegisterDialog from "@/hooks/use-register.dialog";
+import useLoginDialog from "@/hooks/use-login.dialog";
 import useCurrentUser from "@/hooks/api/user-current-user";
 import { useRouter } from "next/navigation";
 
 function NavBar() {
   const router = useRouter();
+  // const pathname = usePathname();
   const { onOpen: onRegisterOpen } = useRegisterDialog();
   const { onOpen: onLoginOpen } = useLoginDialog();
   const [searchKeyword, setSearchKeyword] = React.useState("");
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const { data: userData, isPending: isLoading} = useCurrentUser();
+  const { data: userData, isPending: isLoading } = useCurrentUser();
   const user = userData?.user;
 
   const handleSell = () => {

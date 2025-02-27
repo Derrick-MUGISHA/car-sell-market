@@ -1,15 +1,18 @@
-// use-login.dialog.ts
-import { create } from 'zustand';
+import { parseAsBoolean, useQueryState } from "nuqs";
 
-interface LoginDialogStore {
-  open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
+const useLoginDialog = () => {
+  const [open, setOpen] = useQueryState(
+    "login",
+    parseAsBoolean.withDefault(false)
+  );
 
-// Should be named export, not default
-export const useLoginDialog = create<LoginDialogStore>((set) => ({
-  open: false,
-  onOpen: () => set({ open: true }),
-  onClose: () => set({ open: false }),
-}));
+  const onOpen = () => setOpen(true);
+  const onClose = () => setOpen(false);
+  return {
+    open,
+    onOpen,
+    onClose,
+  };
+};
+
+export default useLoginDialog;

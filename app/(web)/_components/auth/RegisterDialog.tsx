@@ -1,13 +1,14 @@
 "use client";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { signupSchema } from "@/validation/auth.validation";
+import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { signupSchema } from "@/validation/auth.validation";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -19,12 +20,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRegisterDialog } from "@/hooks/use-register.dialog";
-import { useLoginDialog } from "@/hooks/use-login.dialog";
-import { registerMutationFn } from "@/lib/fetcher";
+import { Button } from "@/components/ui/button";
+import useRegisterDialog from "@/hooks/use-register.dialog";
+import useLoginDialog from "@/hooks/use-login.dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { registerMutationFn } from "@/lib/fetcher";
 import { toast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
 
@@ -33,6 +34,7 @@ const RegisterDialog = () => {
   const { onOpen } = useLoginDialog();
 
   const queryClient = useQueryClient();
+
   const { mutate, isPending } = useMutation({
     mutationFn: registerMutationFn,
   });
@@ -42,7 +44,7 @@ const RegisterDialog = () => {
     defaultValues: {
       name: "",
       email: "",
-      ShopName: "",
+      shopName: "",
       password: "",
     },
   });
@@ -75,26 +77,17 @@ const RegisterDialog = () => {
     onClose();
     onOpen();
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-white/90 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-[425px] p-8">
         <DialogHeader>
-          <DialogTitle className="text-center">Create an account</DialogTitle>
-          <DialogDescription className="text-center">
-            Already have an account?{" "}
-            <button
-              className="text-primary font-semibold"
-              onClick={handleLoginOpen}
-            >
-              Sign in
-            </button>
+          <DialogTitle>Create an account</DialogTitle>
+          <DialogDescription>
+            Enter your details below to register for an account.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Form fields */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="name"
@@ -102,22 +95,9 @@ const RegisterDialog = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Derr***" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-red-500 text-xs mt-1" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
                     <Input
-                      placeholder="mail@example.com"
-                      type="email"
+                      placeholder="John Smith"
+                      className="!h-10"
                       {...field}
                     />
                   </FormControl>
@@ -128,13 +108,33 @@ const RegisterDialog = () => {
 
             <FormField
               control={form.control}
-              name="ShopName"
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="mail@example.com"
+                      type="email"
+                      className="!h-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="shopName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Shop Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="kgl store"
+                      placeholder="Techwithemma co."
+                      className="!h-10"
                       {...field}
                     />
                   </FormControl>
@@ -151,8 +151,9 @@ const RegisterDialog = () => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="**************"
+                      placeholder="********"
                       type="password"
+                      className="!h-10"
                       {...field}
                     />
                   </FormControl>
@@ -161,14 +162,26 @@ const RegisterDialog = () => {
               )}
             />
 
-            {/* Other form fields... */}
-
-            <Button type="submit" disabled={isPending} className="w-full">
-              {isPending && <Loader className="w-4 h-4 animate-spin mr-2" />}
+            <Button
+              size="lg"
+              disabled={isPending}
+              className="w-full"
+              type="submit"
+            >
+              {isPending && <Loader className="w-4 h-4 animate-spin" />}
               Register
             </Button>
           </form>
         </Form>
+
+        <div className="mt-2 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <button className="!text-primary" onClick={handleLoginOpen}>
+              Sign in
+            </button>
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

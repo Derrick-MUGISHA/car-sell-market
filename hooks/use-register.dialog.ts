@@ -1,13 +1,18 @@
-import { create } from 'zustand';
+import { parseAsBoolean, useQueryState } from "nuqs";
 
-interface RegisterDialogStore {
-  open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}
+const useRegisterDialog = () => {
+  const [open, setOpen] = useQueryState(
+    "register",
+    parseAsBoolean.withDefault(false)
+  );
 
-export const useRegisterDialog = create<RegisterDialogStore>((set) => ({
-  open: false,
-  onOpen: () => set({ open: true }),
-  onClose: () => set({ open: false }),
-}));
+  const onOpen = () => setOpen(true);
+  const onClose = () => setOpen(false);
+  return {
+    open,
+    onOpen,
+    onClose,
+  };
+};
+
+export default useRegisterDialog;
