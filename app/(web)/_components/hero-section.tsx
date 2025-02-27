@@ -8,10 +8,7 @@ import HeroFooter from "../_footer/hero-footer";
 function HeroSection() {
   return (
     <div
-      className="w-full min-h-[90vh] mb-4 flex items-center"
-      style={{
-        background: `linear-gradient(160deg, #0093E9 0%, #80D0C7 100%)`,
-      }}
+      className="w-full min-h-[90vh] mb-4 flex items-center heroBackground"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 py-8 lg:py-12">
