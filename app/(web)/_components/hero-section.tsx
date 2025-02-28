@@ -8,8 +8,11 @@ import HeroFooter from "../_footer/hero-footer";
 function HeroSection() {
   return (
     <div
-      className="w-full min-h-[90vh] mb-4 flex items-center heroBackground"
-    >
+  className="w-full min-h-[90vh] mb-4 flex items-center"
+  style={{
+    background: 'linear-gradient(93deg, rgba(8,8,8,1) 21%, rgba(128,128,128,1) 77%)',
+  }}
+>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 py-8 lg:py-12">
           {/* Card Section */}

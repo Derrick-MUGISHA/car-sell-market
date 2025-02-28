@@ -76,7 +76,7 @@ const HeroFilter = () => {
       }
     });
     console.log(params);
-    router.push(`/search/${params.toString()}`);
+    // router.push(`/search/${params.toString()}`);
   };
 
   return (
